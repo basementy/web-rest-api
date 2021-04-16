@@ -5,8 +5,6 @@ API Crud de Animais (back-end apenas).
 - Node
 - TypeScript
 ### Instalação:
-- Backend:
-   npm install
+- npm install
 ### Execução:
-- Backend execute:
-   npm start
+- npm start
