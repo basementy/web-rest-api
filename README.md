@@ -1,13 +1,12 @@
 # WEB REST API
- 
 API Crud de Animais (back-end apenas).
-## Dependências:
+### Dependências:
 - npm
 - Node
 - TypeScript
-## Instalação:
+### Instalação:
 - Backend
    npm install
-## Execução:
+### Execução:
 - Backend execute:
    npm start
