@@ -1,7 +1,22 @@
-import { Animal, IAnimal } from "../models/animal";
+import { Animal, EAnimalClass, EAnimalGroup, IAnimal } from "../models/animal";
 import { Request, Response } from "express";
 
 export const getAnimals = (req: Request, res: Response) => {
+  let animals = Animal;
+
+  const animalClass = req.query?.class;
+  const animalGroup = req.query?.group;
+  const animalDescription = req.query?.description;
+
+  if (animalClass){
+    res.send(animals.filter((animal) => animal.class === animalClass));
+  }
+  else if (animalGroup){
+    res.send(animals.filter((animal) => animal.group === animalGroup));
+  }
+  else if (animalDescription) {
+    res.send(animals.filter((animal) => animal.description.toLowerCase().includes(String(animalDescription))));
+  }
   res.send(Animal);
 };
 
