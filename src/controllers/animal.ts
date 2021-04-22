@@ -1,38 +1,83 @@
-import { Animal, EAnimalClass, EAnimalGroup, IAnimal } from "../models/animal";
 import { Request, Response } from "express";
+import { cloneDeep } from "lodash";
 
-export const getAnimals = (req: Request, res: Response) => {
-  let animals = Animal;
+import { Animal, EAnimalClass, EAnimalGroup, IAnimal } from "../models/animal";
+
+export const getAnimals = (
+  req: Request<
+    {},
+    {},
+    {},
+    {
+      class: EAnimalClass;
+      group: EAnimalGroup;
+      description: string;
+    }
+  >,
+  res: Response
+) => {
+  let animals = cloneDeep(Animal);
 
   const animalClass = req.query?.class;
   const animalGroup = req.query?.group;
   const animalDescription = req.query?.description;
 
-  if (animalClass){
-    res.send(animals.filter((animal) => animal.class === animalClass));
+  if (animalClass) {
+    const filteredAnimalsByClass = animals.filter(
+      (animal) => animal.class === animalClass
+    );
+
+    animals = filteredAnimalsByClass;
   }
-  else if (animalGroup){
-    res.send(animals.filter((animal) => animal.group === animalGroup));
+
+  if (animalGroup) {
+    const filteredAnimalsByGroup = animals.filter(
+      (animal) => animal.group === animalGroup
+    );
+
+    animals = filteredAnimalsByGroup;
   }
-  else if (animalDescription) {
-    res.send(animals.filter((animal) => animal.description.toLowerCase().includes(String(animalDescription))));
+
+  if (animalDescription) {
+    const filteredAnimalsByDescription = animals.filter((animal) =>
+      animal.description.toLowerCase().includes(String(animalDescription))
+    );
+
+    animals = filteredAnimalsByDescription;
   }
-  res.send(Animal);
+
+  res.send(animals);
 };
 
 export const getAnimal = (req: Request<{ id: string }>, res: Response) => {
   const animalId = Number(req.params.id);
   const filteredAnimal = Animal.find(({ id }) => id === animalId);
 
-  res.send(filteredAnimal);
+  if (filteredAnimal) {
+    res.send(filteredAnimal);
+  } else {
+    res.status(404);
+    res.json({
+      message: "Informe um ID existente",
+    });
+  }
 };
 
-export const createAnimal = (req: Request, res: Response) => {
-  const animal = req.body as IAnimal;
+export const createAnimal = (
+  req: Request<{}, {}, Omit<IAnimal, "id">>,
+  res: Response
+) => {
+  const animal: IAnimal = {
+    id: Animal[Animal.length - 1].id + 1,
+    description: req.body.description,
+    group: req.body.group,
+    class: req.body.class,
+  };
 
   Animal.push(animal);
 
-  res.send(animal).status(201);
+  res.status(201);
+  res.send(animal);
 };
 
 export const updateAnimal = (req: Request<{ id: string }>, res: Response) => {
@@ -42,5 +87,27 @@ export const updateAnimal = (req: Request<{ id: string }>, res: Response) => {
 
   Animal[filteredAnimalIndex] = newAnimalData;
 
-  res.send(newAnimalData);
+  res.send(Animal[filteredAnimalIndex]);
+};
+
+export const deleteAnimal = (req: Request<{ id: string }>, res: Response) => {
+  const { id } = req.params;
+
+  const deletedAnimalIndex = Animal.findIndex(
+    (animal) => animal?.id === Number(id)
+  );
+
+  console.log(deletedAnimalIndex);
+
+  if (deletedAnimalIndex !== -1) {
+    Animal.splice(deletedAnimalIndex, 1);
+
+    res.status(202);
+    res.send(Animal);
+  } else {
+    res.status(404);
+    res.json({
+      message: "Informe um ID existente",
+    });
+  }
 };
